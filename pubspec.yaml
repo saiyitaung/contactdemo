@@ -30,6 +30,9 @@ dependencies:
   audioplayer: ^0.8.1
   permission_handler: ^8.1.2
   animations: ^2.0.0
+  image_picker: ^0.8.1+3
+  flutter_slidable: ^0.6.0
+  uuid: ^3.0.4
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -57,6 +60,8 @@ flutter:
     - assets/img/ptwo.jfif
     - assets/img/pthree.jfif
     - assets/img/pfour.jfif
+    - assets/img/defaultpic.png
+    - assets/img/speaker.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
