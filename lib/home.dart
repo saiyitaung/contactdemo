@@ -18,20 +18,14 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<MyContact> imgNames = [
-    MyContact(Uuid().v4().toString(), "defaults", "", ["0954858238"],
-        "someaudiopath in future"),
-    MyContact(Uuid().v4().toString(), "dawea", "", ["0948275223"],
-        "someaudiopath in future"),
-    MyContact(Uuid().v4().toString(), "defauawlts", "", ["0947717383"],
-        "someaudiopath in future"),
-    MyContact(Uuid().v4().toString(), "defaults", "", ["09371563474"],
-        "someaudiopath in future"),
-    // "assets/img/pone.jfif",
-    // "assets/img/ptwo.jfif",
-    // "assets/img/pthree.jfif",
-    // "assets/img/pfour.jfif",
-    // "assets/img/defaultpic.png",
-    // "assets/img/defaultpic.png",
+    MyContact(
+        Uuid().v4().toString(), "", ["0954858238"], "someaudiopath in future"),
+    MyContact(
+        Uuid().v4().toString(), "", ["0948275223"], "someaudiopath in future"),
+    MyContact(
+        Uuid().v4().toString(), "", ["0947717383"], "someaudiopath in future"),
+    MyContact(
+        Uuid().v4().toString(), "", ["09371563474"], "someaudiopath in future"), 
   ];
   @override
   Widget build(BuildContext context) {
@@ -149,10 +143,11 @@ class _MyHomePageState extends State<MyHomePage> {
                             ],
                           ),
                           trailing: IconButton(
-                            icon: Image(image: AssetImage("assets/img/speaker.png"),),
+                            icon: Image(
+                              image: AssetImage("assets/img/speaker.png"),
+                            ),
                             onPressed: () {},
                           ),
-                          
                         );
                       },
                       itemCount: callLogs.length,

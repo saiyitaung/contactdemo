@@ -1,9 +1,9 @@
 class MyContact {
   String uuid;
-  String name;
+  String? name;
   String picture;
   List<String> numbers;
   String audioName;
-  
-  MyContact(this.uuid, this.name, this.picture, this.numbers, this.audioName);
+
+  MyContact(this.uuid, this.picture, this.numbers, this.audioName,{this.name});
 }

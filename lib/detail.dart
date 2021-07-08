@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:mycontactapp/entity/mycontact.dart';
 
@@ -41,10 +42,15 @@ class DetailPage extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-               
                 Container(
-                  child:
-                      IconButton(onPressed: () {}, icon: Image(image: AssetImage("assets/img/speaker.png"),)),
+                  child: IconButton(
+                      onPressed: () async {
+                        await AudioPlayer()
+                            .play(contact.audioName, isLocal: true);
+                      },
+                      icon: Image(
+                        image: AssetImage("assets/img/speaker.png"),
+                      )),
                 ),
                 Container(
                   child: IconButton(onPressed: () {}, icon: Icon(Icons.call)),
