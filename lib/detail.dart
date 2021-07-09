@@ -3,21 +3,37 @@ import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:mycontactapp/entity/mycontact.dart';
+import 'package:mycontactapp/logger/mylogger.dart';
 
 class DetailPage extends StatelessWidget {
   final MyContact contact;
+  final MyLogger logger = MyLogger("DetailPage", "");
   DetailPage(this.contact);
   Widget build(BuildContext context) {
+    logger.log(contact.picture);
     return Scaffold(
       appBar: AppBar(
         title: Text("Detail page"),
+        actions: [
+          IconButton(onPressed: (){
+            logger.log("add to favorite");
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Add to favorite"),duration: Duration(milliseconds: 700),));
+          },icon: Icon(Icons.star),),
+           IconButton(onPressed: (){
+             logger.log("edit .,.");
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Edit contact",),duration: Duration(milliseconds: 800),));
+
+           },icon: Icon(Icons.edit),),
+        ],
       ),
       body: Column(
         children: [
           Container(
             width: MediaQuery.of(context).size.width,
             height: (MediaQuery.of(context).size.height / 100) * 40,
-            child: Container(
+            child: Hero(
+              tag: contact.uuid,
+              child:Container(
               width: (MediaQuery.of(context).size.width / 100) * 80,
               height: (MediaQuery.of(context).size.height / 100) * 40,
               decoration: BoxDecoration(
@@ -35,6 +51,7 @@ class DetailPage extends StatelessWidget {
                         fit: BoxFit.cover),
               ),
             ),
+            ),
           ),
           Container(
             height: 60,
@@ -45,8 +62,14 @@ class DetailPage extends StatelessWidget {
                 Container(
                   child: IconButton(
                       onPressed: () async {
-                        await AudioPlayer()
-                            .play(contact.audioName, isLocal: true);
+                        File f = File(contact.audioName);
+                        if (await f.exists()) {
+                          await AudioPlayer()
+                              .play(contact.audioName, isLocal: true);
+                        } else {
+                          logger.log("File doesn't exist!");
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:  Text("File Not Exists!")));
+                        }
                       },
                       icon: Image(
                         image: AssetImage("assets/img/speaker.png"),
@@ -63,7 +86,7 @@ class DetailPage extends StatelessWidget {
             itemBuilder: (context, index) {
               return Padding(
                 child: ListTile(
-                  leading: Icon(Icons.phone),
+                  leading: IconButton(icon: Icon(Icons.phone,color: Colors.green),onPressed: (){},),
                   title: Text(
                     contact.numbers.first,
                     style: TextStyle(fontSize: 22),

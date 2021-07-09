@@ -20,8 +20,8 @@ class _RecordVoiceNameState extends State<RecordVoiceName>{
   String appdirpath;
   late MyLogger logger;
   bool isNew;
-  late FlutterAudioRecorder2 _recorder2;
-  late Recording _current;
+    FlutterAudioRecorder2? _recorder2;
+    Recording? _current;
   RecordingStatus _currentStats = RecordingStatus.Unset;
  AudioPlayer player=AudioPlayer();
    _RecordVoiceNameState(
@@ -58,9 +58,9 @@ class _RecordVoiceNameState extends State<RecordVoiceName>{
         }
         _recorder2 =new FlutterAudioRecorder2(fileName, audioFormat: AudioFormat.WAV,);
         //initialize recorder
-        await _recorder2.initialized;
+        await _recorder2?.initialized;
         //get current from _recorder2
-        var current = await _recorder2.current(channel: 0);
+        var current = await _recorder2!.current(channel: 0);
         // print(current);
         //setState  current to _current
         //set Current Stats
@@ -103,8 +103,8 @@ class _RecordVoiceNameState extends State<RecordVoiceName>{
 
   _start() async {
     try {
-      await _recorder2.start();
-      var recording = await _recorder2.current(channel: 0);
+      await _recorder2!.start();
+      var recording = await _recorder2!.current(channel: 0);
       setState(() {
         _current = recording!;
       });
@@ -115,11 +115,11 @@ class _RecordVoiceNameState extends State<RecordVoiceName>{
           t.cancel();
         }
 
-        var current = await _recorder2.current(channel: 0);
+        var current = await _recorder2!.current(channel: 0);
         // print(current.status);
         setState(() {
           _current = current!;
-          _currentStats = _current.status!;
+          _currentStats = _current!.status!;
         });
       });
       //set durtion for 6 sec
@@ -139,10 +139,10 @@ class _RecordVoiceNameState extends State<RecordVoiceName>{
   }
 
   _stop() async {
-    var result = await _recorder2.stop();
+    var result = await _recorder2!.stop();
     setState(() {
       _current = result!;
-      _currentStats = _current.status!;
+      _currentStats = _current!.status!;
     });
   }
 
@@ -254,9 +254,9 @@ class _RecordVoiceNameState extends State<RecordVoiceName>{
               width: MediaQuery.of(context).size.width,
               // color: Colors.blue,
               child: _currentStats == RecordingStatus.Stopped
-                  ? Center(child: displayFileName(_current.path!))
+                  ? Center(child: displayFileName("${_current?.path}"))
                   : Center(
-                      child: Text("${_current.duration}"),
+                      child: Text("${_current?.duration}"),
                     ),
             ),
             new Expanded(
@@ -312,8 +312,8 @@ class _RecordVoiceNameState extends State<RecordVoiceName>{
   }
 
   void onPlayAudio() async {
-    logger.log(_current.path!);
-    await player.play(_current.path!,isLocal: true);
+    logger.log(_current!.path!);
+    await player.play(_current!.path!,isLocal: true);
       }
 }
 

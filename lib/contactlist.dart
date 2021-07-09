@@ -28,7 +28,10 @@ class _ContactListState extends State<ContactList> {
         itemBuilder: (context, index) {
           return InkWell(
             child: Card(
-              child: Container(
+              child: Hero(
+                tag: imgNames[index].uuid,
+                child:Container(
+                
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(5),
 
@@ -46,6 +49,7 @@ class _ContactListState extends State<ContactList> {
                   //     image: AssetImage(imgNames[index].picture), fit: BoxFit.cover)),
                 ),
               ),
+            ),
             ),
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(

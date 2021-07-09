@@ -17,8 +17,13 @@ class _NewContactState extends State<NewContact> {
   PickedFile? _pickedFile;
   final ImagePicker _picker = new ImagePicker();
   TextEditingController phCtl = TextEditingController();
-  final String uuid=Uuid().v4().toString();
+  final String uuid = Uuid().v4().toString();
   MyLogger logger = MyLogger("NewContact", "");
+
+  void dispose(){
+    super.dispose();
+    logger.log("dispose");
+  }
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -150,8 +155,7 @@ class _NewContactState extends State<NewContact> {
                             enableDrag: false,
                             context: context,
                             builder: (context) {
-                              return RecordVoiceName(
-                                  uuid, dir.path, true);
+                              return RecordVoiceName(uuid, dir.path, true);
                             });
                       },
                     ),
@@ -162,7 +166,7 @@ class _NewContactState extends State<NewContact> {
                       onPressed: () async {
                         Directory? dir = await getExternalStorageDirectory();
                         await AudioPlayer()
-                            .play(dir!.path + "/" + uuid+".wav");
+                            .play(dir!.path + "/" + uuid + ".wav");
                       },
                       icon: Image(
                         image: AssetImage("assets/img/speaker.png"),
@@ -191,11 +195,14 @@ class _NewContactState extends State<NewContact> {
                     } else {
                       List<String> splits = image!.path.split("/");
                       final fileExt = splits.last.split(".")[1];
-                      final fileName=uuid +"."+fileExt;
+                      final fileName = uuid + "." + fileExt;
                       logger.log(" image file Name = $fileName");
-                      image!.copy(dir!.path+"/"+fileName);
-                      newContact = MyContact(Uuid().v4().toString(), dir.path+"/"+fileName,
-                          [phCtl.text], dir.path+"/"+uuid+".wav");
+                      image!.copy(dir!.path + "/" + fileName);
+                      newContact = MyContact(
+                          Uuid().v4().toString(),
+                          dir.path + "/" + fileName,
+                          [phCtl.text],
+                          dir.path + "/" + uuid + ".wav");
                     }
                     logger.log("new Contact ${newContact.picture}");
                     Navigator.of(context).pop(newContact);

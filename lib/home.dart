@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:call_log/call_log.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:mycontactapp/contactlist.dart';
 import 'package:mycontactapp/entity/mycontact.dart';
 import 'package:uuid/uuid.dart';
@@ -44,14 +45,15 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: [
                   ListView.builder(
                     itemBuilder: (context, index) {
-                      return Container(
+                      return Hero(
+                        tag: imgNames[index].uuid,
+                        child:Container(
                         height: 80,
                         width: 80,
                         margin: EdgeInsets.symmetric(horizontal: 1),
                         // decoration: BoxDecoration(shape: BoxShape.circle),
                         child: OpenContainer(
                           // closedColor: Colors.teal,
-
                           closedShape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10)),
                           transitionDuration: Duration(milliseconds: 350),
@@ -72,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             return DetailPage(imgNames[index]);
                           },
                         ),
-                      );
+                      ),);
                     },
                     itemCount: imgNames.length,
                     scrollDirection: Axis.horizontal,
@@ -107,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     return ListView.builder(
                       itemBuilder: (context, index) {
                         CallLogEntry log = callLogs[index];
-                        return ListTile(
+                        return Slidable(child:    ListTile(
                           leading: Container(
                             height: 60,
                             width: 60,
@@ -148,6 +150,11 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                             onPressed: () {},
                           ),
+                        ),
+                        actionPane: SlidableDrawerActionPane(),
+                        secondaryActions: [
+                          IconButton(icon: Icon(Icons.call,size: 28,color: Colors.green,),onPressed: (){},)
+                        ],
                         );
                       },
                       itemCount: callLogs.length,
