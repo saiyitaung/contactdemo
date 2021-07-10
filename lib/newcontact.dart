@@ -9,10 +9,13 @@ import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 class NewContact extends StatefulWidget {
-  _NewContactState createState() => _NewContactState();
+  final String number;
+  NewContact(this.number);
+  _NewContactState createState() => _NewContactState(number);
 }
 
 class _NewContactState extends State<NewContact> {
+  String number;
   File? image;
   PickedFile? _pickedFile;
   final ImagePicker _picker = new ImagePicker();
@@ -20,10 +23,21 @@ class _NewContactState extends State<NewContact> {
   final String uuid = Uuid().v4().toString();
   MyLogger logger = MyLogger("NewContact", "");
 
-  void dispose(){
+  void initState() {
+    super.initState();
+    if (number != "") {
+      setState(() {
+        phCtl.text = number;
+      });
+    }
+  }
+
+  _NewContactState(this.number);
+  void dispose() {
     super.dispose();
     logger.log("dispose");
   }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -165,8 +179,11 @@ class _NewContactState extends State<NewContact> {
                     child: IconButton(
                       onPressed: () async {
                         Directory? dir = await getExternalStorageDirectory();
-                        await AudioPlayer()
-                            .play(dir!.path + "/" + uuid + ".wav");
+                        if (await File(dir!.path + "/" + uuid + ".wav")
+                            .exists()) {
+                          await AudioPlayer()
+                              .play(dir.path + "/" + uuid + ".wav");
+                        }
                       },
                       icon: Image(
                         image: AssetImage("assets/img/speaker.png"),
@@ -186,26 +203,32 @@ class _NewContactState extends State<NewContact> {
                   child: TextButton(
                 style: TextButton.styleFrom(backgroundColor: Colors.blue),
                 onPressed: () async {
-                  if (phCtl.text != "") {
+                  final dir = await getExternalStorageDirectory();
+                  if (phCtl.text != "" &&
+                      await File(dir!.path + "/" + uuid + ".wav").exists()) {
                     MyContact newContact;
-                    final dir = await getExternalStorageDirectory();
-
                     if (image?.path == null) {
-                      newContact = MyContact(uuid, "", [phCtl.text], "default");
+                      newContact = MyContact(uuid:uuid, picture:"", numbers:[phCtl.text],
+                          audioName:dir.path + "/" + uuid + ".wav");
                     } else {
                       List<String> splits = image!.path.split("/");
                       final fileExt = splits.last.split(".")[1];
                       final fileName = uuid + "." + fileExt;
                       logger.log(" image file Name = $fileName");
-                      image!.copy(dir!.path + "/" + fileName);
+                      image!.copy(dir.path + "/" + fileName);
                       newContact = MyContact(
-                          Uuid().v4().toString(),
-                          dir.path + "/" + fileName,
-                          [phCtl.text],
-                          dir.path + "/" + uuid + ".wav");
+                          uuid:Uuid().v4().toString(),
+                          picture:dir.path + "/" + fileName,
+                          numbers:[phCtl.text],
+                          audioName:dir.path + "/" + uuid + ".wav");
                     }
                     logger.log("new Contact ${newContact.picture}");
                     Navigator.of(context).pop(newContact);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text("Audio Name and Phone Number Required"),
+                      duration: Duration(milliseconds: 700),
+                    ));
                   }
                 },
                 child: Container(
