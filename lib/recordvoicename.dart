@@ -160,7 +160,7 @@ class _RecordVoiceNameState extends State<RecordVoiceName>{
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(names[names.length - 1]),
+          Text(names[names.length - 1].substring(0,10)+".wav"),
           IconButton(
             icon: Icon(
               Icons.delete,

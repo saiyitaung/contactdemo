@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:hive/hive.dart';
 import 'package:mycontactapp/editcontact.dart';
 import 'package:mycontactapp/entity/mycontact.dart';
@@ -18,6 +19,7 @@ class _DetailPageState extends State<DetailPage> {
   MyContact contact;
   MyLogger logger = MyLogger("DetailPage", "");
   Box<MyContact> box = Hive.box(DB);
+  AudioPlayer player = AudioPlayer();
   _DetailPageState({required this.contact});
   Widget build(BuildContext context) {
     logger.log(contact.picture!);
@@ -38,11 +40,13 @@ class _DetailPageState extends State<DetailPage> {
                 duration: Duration(milliseconds: 700),
               ));
             },
-            icon: Icon(Icons.star,color: contact.isFavorite ? Colors.black:Colors.white,),
+            icon: Icon(
+              Icons.star,
+              color: contact.isFavorite ? Colors.black : Colors.white,
+            ),
           ),
           IconButton(
             onPressed: () {
-
               logger.log("edit .,.");
               // ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               //   content: Text(
@@ -50,7 +54,12 @@ class _DetailPageState extends State<DetailPage> {
               //   ),
               //   duration: Duration(milliseconds: 800),
               // ));
-              Navigator.of(context).push(MaterialPageRoute<MyContact>(builder: (context)=> EditContact(contact)));
+              Navigator.of(context)
+                  .push(MaterialPageRoute<MyContact>(
+                      builder: (context) => EditContact(contact)))
+                  .then((value) {
+                setState(() {});
+              });
             },
             icon: Icon(Icons.edit),
           ),
@@ -95,8 +104,9 @@ class _DetailPageState extends State<DetailPage> {
                       File f = File(contact.audioName!);
                       logger.log(contact.audioName!);
                       if (await f.exists()) {
-                        await AudioPlayer()
-                            .play(contact.audioName!, isLocal: true);
+                        // await AudioPlayer()
+                        //     .play(contact.audioName!, isLocal: true);
+                        player.play(contact.audioName!, isLocal: true);
                       } else {
                         logger.log("File doesn't exist!");
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -109,7 +119,12 @@ class _DetailPageState extends State<DetailPage> {
                   ),
                 ),
                 Container(
-                  child: IconButton(onPressed: () {}, icon: Icon(Icons.call)),
+                  child: IconButton(
+                      onPressed: () {
+                        FlutterPhoneDirectCaller.callNumber(
+                            contact.numbers!.first);
+                      },
+                      icon: Icon(Icons.call)),
                 ),
               ],
             ),
@@ -118,7 +133,9 @@ class _DetailPageState extends State<DetailPage> {
             child: ListTile(
               leading: IconButton(
                 icon: Icon(Icons.phone, color: Colors.green),
-                onPressed: () {},
+                onPressed: () {
+                  FlutterPhoneDirectCaller.callNumber(contact.numbers!.first);
+                },
               ),
               title: Text(
                 contact.numbers!.first,

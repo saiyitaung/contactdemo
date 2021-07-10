@@ -4,6 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:call_log/call_log.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -28,6 +29,7 @@ class _MyHomePageState extends State<MyHomePage> {
   MyLogger logger = MyLogger("_MyHomePageState", "");
   late List<MyContact> contactList;
   late List<MyContact> favorites;
+  AudioPlayer player=AudioPlayer();
   List<MyContact> favoritesList(List<MyContact> contacts) {
     List<MyContact> favorites = [];
     for (MyContact c in contacts) {
@@ -185,8 +187,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                         File f = File(audioPath);
                                         if (await f.exists()) {
                                           logger.log("play audio");
-                                          await AudioPlayer()
-                                              .play(audioPath, isLocal: true);
+                                          player.play(audioPath,isLocal: true);
                                         }
                                       }
                                     }
@@ -218,9 +219,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 color: Colors.green,
                               ),
                               onPressed: () {
-                                
-                               // Flutter
-                                // FlutterPhoneDirectCaller.callNumber(contactList[index].numbers!.first);
+                                FlutterPhoneDirectCaller.callNumber(contactList[index].numbers!.first);                                
                               },
                             )
                           ],

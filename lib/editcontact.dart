@@ -1,9 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mycontactapp/entity/mycontact.dart';
 import 'package:mycontactapp/logger/mylogger.dart';
+import 'package:mycontactapp/recordvoicename.dart';
+import 'package:mycontactapp/utils/util.dart';
+import 'package:path_provider/path_provider.dart';
 
 class EditContact extends StatefulWidget {
   final MyContact contact;
@@ -14,14 +18,19 @@ class EditContact extends StatefulWidget {
 class _EditContactState extends State<EditContact> {
   MyContact contact;
   MyLogger logger = MyLogger("_EditContactState", "");
-  TextEditingController phCtl=TextEditingController();
+  File? _imageFile;
+  PickedFile? _pickFile;
+  final ImagePicker _picker = new ImagePicker();
+  TextEditingController phCtl = TextEditingController();
+  Box<MyContact> box=Hive.box(DB);
   _EditContactState(this.contact);
-  void initState(){
+  void initState() {
     super.initState();
     setState(() {
-      phCtl.text=contact.numbers!.first;
+      phCtl.text = contact.numbers!.first;
     });
   }
+
   Widget build(BuildContext context) {
     double h = MediaQuery.of(context).size.height;
     double w = MediaQuery.of(context).size.width;
@@ -52,51 +61,75 @@ class _EditContactState extends State<EditContact> {
                   Positioned(
                     bottom: 20,
                     left: (MediaQuery.of(context).size.width / 100) * 37,
-                    child: Container(child:DropdownButton<ImageSource>(
-                      dropdownColor: Colors.blueGrey,
-                      underline: Container(),
-                      items: [
-                        DropdownMenuItem<ImageSource>(
-                          child: Text("Camera"),
-                          value: ImageSource.camera,
-                        ),
-                        DropdownMenuItem<ImageSource>(
-                          child: Text("gallery"),
-                          value: ImageSource.gallery,
-                        )
-                      ],
-                      onChanged: (v) async {
-                        if (v == ImageSource.camera) {
-                          logger.log("Image Source Camera");
-                        } else {
-                          logger.log("Image Source gallery");
-                        }
-                      },
-                      selectedItemBuilder: (context) {
-                        return [
+                    child: Container(
+                      child: DropdownButton<ImageSource>(
+                        dropdownColor: Colors.blueGrey,
+                        underline: Container(),
+                        items: [
                           DropdownMenuItem<ImageSource>(
-                            child:  Text("Set Picture",
-                                style: TextStyle(color: Colors.white,),
-                                 ),
+                            child: Text("Camera"),
                             value: ImageSource.camera,
                           ),
-                        ];
-                      },
-                      value: ImageSource.camera,
+                          DropdownMenuItem<ImageSource>(
+                            child: Text("gallery"),
+                            value: ImageSource.gallery,
+                          )
+                        ],
+                        onChanged: (v) async {
+                          final appPath = await getExternalStorageDirectory();
+                          if (v == ImageSource.camera) {
+                            _pickFile = await _picker.getImage(
+                                source: ImageSource.camera);
+                            _imageFile = File(_pickFile!.path);
+                            logger.log("Update profile pic from camera");
+                          } else {
+                            _pickFile = await _picker.getImage(
+                                source: ImageSource.gallery);
+                            _imageFile = File(_pickFile!.path);
+                            logger.log("Update profile pic from gallery");
+                          }
+                          // get file name
+                          final _fileName = _pickFile!.path.split("/").last;
+                          //get file ext
+                          final _fileExt = _fileName.split(".").last;
+                          //copy image file to appdir and rename with contact's uuid
+                          //final _oldPic=contact.picture;
+                          await _imageFile!.copy(
+                              appPath!.path + "/" + contact.uuid! + _fileExt);
+                          
+                          setState(() {
+                            contact.picture=appPath.path+"/"+contact.uuid!+_fileExt;
+                                box.put(contact.uuid, contact);
+                              });
+                              
+                        },
+                        selectedItemBuilder: (context) {
+                          return [
+                            DropdownMenuItem<ImageSource>(
+                              child: Text(
+                                "Set Picture",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                              value: ImageSource.camera,
+                            ),
+                          ];
+                        },
+                        value: ImageSource.camera,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.blueGrey,
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 8),
                     ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Colors.blueGrey,
-
-                    ),
-                    padding: EdgeInsets.symmetric(horizontal: 8),
-                  ),
                   ),
                 ],
               ),
             ),
 
-             Container(
+            Container(
               height: 60,
               width: MediaQuery.of(context).size.width,
               child: Row(
@@ -138,16 +171,45 @@ class _EditContactState extends State<EditContact> {
                     child: IconButton(
                       icon: Icon(Icons.mic),
                       onPressed: () async {
- 
+                        final dirPath = await getExternalStorageDirectory();
+                        showModalBottomSheet<bool>(
+                            isDismissible: false,
+                            enableDrag: false,
+                            context: context,
+                            builder: (context) {
+                              return RecordVoiceName(
+                                  contact.uuid!, dirPath!.path, false);
+                            }).then((value) async {
+                              logger.log("return from recordvoice $value");
+                          // if true replace old file with update file
+                          File f = File(dirPath!.path +"/"+
+                              contact.uuid! +
+                              "_tempupdate" +
+                              ".wav");
+                          if (await f.exists()) {
+                            if (value!) {
+                              logger.log("update audiofile here!");
+                              final filePath =
+                                  dirPath.path + "/" + contact.uuid! + ".wav";
+                              final oldFile = File(filePath);
+                              logger.log("deleting old audio file");
+                              await oldFile.delete();
+                              logger.log("Rename updated file");
+                              await f.rename(filePath);
+                            } else {
+                              //else delete an update recorded audio file
+                              await f.delete();
+                              logger.log("doesn't want to save a update!");
+                            }
+                          }
+                        });
                       },
                     ),
                     width: (MediaQuery.of(context).size.width / 100) * 30,
                   ),
                   Container(
                     child: IconButton(
-                      onPressed: () async {
-                       
-                      },
+                      onPressed: () async {},
                       icon: Image(
                         image: AssetImage("assets/img/speaker.png"),
                       ),
@@ -160,24 +222,24 @@ class _EditContactState extends State<EditContact> {
             SizedBox(
               height: 10,
             ),
-            Container(
-              width: MediaQuery.of(context).size.width,
-              child: Center(
-                  child: TextButton(
-                style: TextButton.styleFrom(backgroundColor: Colors.blue),
-                onPressed: () async {
-                  
-                },
-                child: Container(
-                  child: Center(
-                      child: Text(
-                    "Update",
-                    style: TextStyle(color: Colors.white),
-                  )),
-                  width: 120,
-                ),
-              )),
-            ),
+            // Container(
+            //   width: MediaQuery.of(context).size.width,
+            //   child: Center(
+            //       child: TextButton(
+            //     style: TextButton.styleFrom(backgroundColor: Colors.blue),
+            //     onPressed: () async {
+
+            //     },
+            //     child: Container(
+            //       child: Center(
+            //           child: Text(
+            //         "Update",
+            //         style: TextStyle(color: Colors.white),
+            //       )),
+            //       width: 120,
+            //     ),
+            //   )),
+            // ),
           ],
         ),
       ),

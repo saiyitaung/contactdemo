@@ -21,6 +21,7 @@ class _NewContactState extends State<NewContact> {
   final ImagePicker _picker = new ImagePicker();
   TextEditingController phCtl = TextEditingController();
   final String uuid = Uuid().v4().toString();
+  AudioPlayer player =AudioPlayer();
   MyLogger logger = MyLogger("NewContact", "");
 
   void initState() {
@@ -181,8 +182,9 @@ class _NewContactState extends State<NewContact> {
                         Directory? dir = await getExternalStorageDirectory();
                         if (await File(dir!.path + "/" + uuid + ".wav")
                             .exists()) {
-                          await AudioPlayer()
-                              .play(dir.path + "/" + uuid + ".wav");
+                          // await AudioPlayer()
+                          //     .play(dir.path + "/" + uuid + ".wav");
+                          player.play(dir.path+"/"+uuid+".wav");
                         }
                       },
                       icon: Image(
