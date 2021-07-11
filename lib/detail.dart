@@ -21,6 +21,12 @@ class _DetailPageState extends State<DetailPage> {
   Box<MyContact> box = Hive.box(DB);
   AudioPlayer player = AudioPlayer();
   _DetailPageState({required this.contact});
+
+  void dispose() {
+    super.dispose();
+    player.stop();
+  }
+
   Widget build(BuildContext context) {
     logger.log(contact.picture!);
     return Scaffold(
@@ -36,7 +42,7 @@ class _DetailPageState extends State<DetailPage> {
 
               logger.log("add to favorite");
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text("Add to favorite"),
+                content: Text(!contact.isFavorite ? "remove from favorite":"add to favorite"),
                 duration: Duration(milliseconds: 700),
               ));
             },
@@ -129,30 +135,53 @@ class _DetailPageState extends State<DetailPage> {
               ],
             ),
           ),
-          Padding(
-            child: ListTile(
-              leading: IconButton(
-                icon: Icon(Icons.phone, color: Colors.green),
-                onPressed: () {
-                  FlutterPhoneDirectCaller.callNumber(contact.numbers!.first);
-                },
-              ),
-              title: Text(
-                contact.numbers!.first,
-                style: TextStyle(fontSize: 22),
-              ),
-            ),
-            padding: EdgeInsets.symmetric(horizontal: 20),
-          ),
-          // Expanded(
-          //     child: ListView.builder(
-          //   itemBuilder: (context, index) {
-          //     return
-          //   },
-          //   itemCount: 2,
-          // )),
+          Expanded(
+              child: ListView.builder(
+            itemBuilder: (context, index) {
+              return Padding(
+                child: ListTile(
+                  leading: IconButton(
+                    icon: Icon(Icons.phone, color: Colors.green),
+                    onPressed: () {
+                      FlutterPhoneDirectCaller.callNumber(
+                          contact.numbers![index]);
+                    },
+                  ),
+                  title: Text(
+                    contact.numbers![index],
+                    style: TextStyle(fontSize: 22),
+                  ),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 20),
+              );
+            },
+            itemCount: contact.numbers!.length,
+          )),
         ],
       ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     showDialog<bool>(context: context, builder: (context){
+      //       return AlertDialog(
+      //         title: Text("Delete?",textAlign: TextAlign.center,),
+      //         content: Text("Please Confirm to Delete."),
+      //         actions: [
+      //           Container(
+      //             width: MediaQuery.of(context).size.width,
+      //             child: Row(
+      //               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      //               children: [
+      //                 TextButton(onPressed: ()=>Navigator.pop(context,false), child: Text("Cancel")),
+      //                 TextButton(onPressed: ()=>Navigator.pop(context,true), child: Text("Confirm")),
+      //               ],
+      //             ),
+      //           )
+      //         ],
+      //       );
+      //     }).then((value) => value == true ? Navigator.of(context).pop(value):logger.log("cancel deleting "));
+      //   },
+      //   child: Icon(Icons.delete),
+      // ),
     );
   }
 }

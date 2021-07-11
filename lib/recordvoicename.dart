@@ -32,6 +32,7 @@ class _RecordVoiceNameState extends State<RecordVoiceName>{
   void initState() {
     super.initState();
      logger = new MyLogger(" RecordAduioButtonSheet ",appdirpath);
+     logger.log(phNumber);
     _init();
   }
 

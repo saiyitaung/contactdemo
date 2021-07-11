@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,6 +9,7 @@ import 'package:mycontactapp/logger/mylogger.dart';
 import 'package:mycontactapp/recordvoicename.dart';
 import 'package:mycontactapp/utils/util.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 
 class EditContact extends StatefulWidget {
   final MyContact contact;
@@ -22,12 +24,17 @@ class _EditContactState extends State<EditContact> {
   PickedFile? _pickFile;
   final ImagePicker _picker = new ImagePicker();
   TextEditingController phCtl = TextEditingController();
-  Box<MyContact> box=Hive.box(DB);
+  TextEditingController phCtl2 = TextEditingController();
+  final player = AudioPlayer();
+  Box<MyContact> box = Hive.box(DB);
   _EditContactState(this.contact);
   void initState() {
     super.initState();
     setState(() {
       phCtl.text = contact.numbers!.first;
+      if(contact.numbers!.length == 2){
+        phCtl2.text=contact.numbers!.last;
+      }
     });
   }
 
@@ -85,23 +92,38 @@ class _EditContactState extends State<EditContact> {
                           } else {
                             _pickFile = await _picker.getImage(
                                 source: ImageSource.gallery);
-                            _imageFile = File(_pickFile!.path);
+                            _imageFile = File(_pickFile!.path,);
                             logger.log("Update profile pic from gallery");
                           }
+
+                          logger.log("selecte file path ${_imageFile!.path}");
                           // get file name
                           final _fileName = _pickFile!.path.split("/").last;
                           //get file ext
                           final _fileExt = _fileName.split(".").last;
                           //copy image file to appdir and rename with contact's uuid
-                          //final _oldPic=contact.picture;
-                          await _imageFile!.copy(
-                              appPath!.path + "/" + contact.uuid! + _fileExt);
-                          
+                          final _oldPicName = contact.picture!;
+                          final _newPicName = appPath!.path +
+                              "/" +
+                              Uuid().v4().toString() +
+                              "." +
+                              _fileExt;
+
+                              if(contact.picture! != "" ){
+                               await File(_oldPicName).delete();
+                               logger.log("Delete old pic $_oldPicName");
+                              }
+                          await _imageFile!.copy(_newPicName);
+                          //delete old profile pic if file ext is not the same or some reason file doesn't overwrite with new pic
+                          // if (_oldPicName != _newPicName) {
+                            
+                          //   logger.log("Deleting $_oldPicName");
+                          // }
                           setState(() {
-                            contact.picture=appPath.path+"/"+contact.uuid!+_fileExt;
-                                box.put(contact.uuid, contact);
-                              });
-                              
+                            contact.picture = _newPicName;
+                            logger.log("change pice ${contact.picture}");
+                            box.put(contact.uuid, contact);
+                          });
                         },
                         selectedItemBuilder: (context) {
                           return [
@@ -128,7 +150,6 @@ class _EditContactState extends State<EditContact> {
                 ],
               ),
             ),
-
             Container(
               height: 60,
               width: MediaQuery.of(context).size.width,
@@ -148,6 +169,48 @@ class _EditContactState extends State<EditContact> {
                       decoration: InputDecoration(
                           hintText: "Phone Number", labelText: "Phone Number"),
                       controller: phCtl,
+                      onChanged: (v) {
+                         if (v.length > 8 && v.length < 12) {
+                        contact.numbers!.first = v;
+                        box.put(contact.uuid, contact);
+                         }
+                      },
+                    ),
+                    width: (MediaQuery.of(context).size.width / 100) * 55,
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              height: 60,
+              width: MediaQuery.of(context).size.width,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Container(
+                    child: Text(
+                      "Phone Number 2",
+                      textAlign: TextAlign.center,
+                    ),
+                    width: (MediaQuery.of(context).size.width / 100) * 40,
+                  ),
+                  Container(
+                    child: TextField(
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                          hintText: "Phone Number", labelText: "Phone Number"),
+                      controller: phCtl2,
+                      onChanged: (v) {
+                        if (v.length > 8 && v.length < 12) {
+                           if(contact.numbers!.length == 1){
+                             contact.numbers!.add(v);
+                           }else{
+                             contact.numbers!.last=v;
+                           }
+                          logger.log("${contact.numbers!.last}");
+                           box.put(contact.uuid, contact);
+                        }
+                      },
                     ),
                     width: (MediaQuery.of(context).size.width / 100) * 55,
                   ),
@@ -172,17 +235,20 @@ class _EditContactState extends State<EditContact> {
                       icon: Icon(Icons.mic),
                       onPressed: () async {
                         final dirPath = await getExternalStorageDirectory();
+
                         showModalBottomSheet<bool>(
                             isDismissible: false,
                             enableDrag: false,
                             context: context,
                             builder: (context) {
+                              logger.log("contact uuid : ${contact.uuid!}");
                               return RecordVoiceName(
                                   contact.uuid!, dirPath!.path, false);
                             }).then((value) async {
-                              logger.log("return from recordvoice $value");
+                          logger.log("return from recordvoice $value");
                           // if true replace old file with update file
-                          File f = File(dirPath!.path +"/"+
+                          File f = File(dirPath!.path +
+                              "/" +
                               contact.uuid! +
                               "_tempupdate" +
                               ".wav");
@@ -209,7 +275,9 @@ class _EditContactState extends State<EditContact> {
                   ),
                   Container(
                     child: IconButton(
-                      onPressed: () async {},
+                      onPressed: () async {
+                        await player.play(contact.audioName!);
+                      },
                       icon: Image(
                         image: AssetImage("assets/img/speaker.png"),
                       ),
@@ -222,24 +290,6 @@ class _EditContactState extends State<EditContact> {
             SizedBox(
               height: 10,
             ),
-            // Container(
-            //   width: MediaQuery.of(context).size.width,
-            //   child: Center(
-            //       child: TextButton(
-            //     style: TextButton.styleFrom(backgroundColor: Colors.blue),
-            //     onPressed: () async {
-
-            //     },
-            //     child: Container(
-            //       child: Center(
-            //           child: Text(
-            //         "Update",
-            //         style: TextStyle(color: Colors.white),
-            //       )),
-            //       width: 120,
-            //     ),
-            //   )),
-            // ),
           ],
         ),
       ),

@@ -4,6 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:call_log/call_log.dart';
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hive/hive.dart';
@@ -29,7 +30,7 @@ class _MyHomePageState extends State<MyHomePage> {
   MyLogger logger = MyLogger("_MyHomePageState", "");
   late List<MyContact> contactList;
   late List<MyContact> favorites;
-  AudioPlayer player=AudioPlayer();
+  AudioPlayer player = AudioPlayer();
   List<MyContact> favoritesList(List<MyContact> contacts) {
     List<MyContact> favorites = [];
     for (MyContact c in contacts) {
@@ -39,7 +40,10 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     return favorites;
   }
-
+  void dispose(){
+    super.dispose();
+    player.stop();
+  }
   @override
   Widget build(BuildContext context) {
     contactList = box.values.toList();
@@ -65,8 +69,10 @@ class _MyHomePageState extends State<MyHomePage> {
                         )
                       : ValueListenableBuilder(
                           valueListenable: box.listenable(),
-                          builder: (context,Box<MyContact> contactsBox, child) {
-                            favorites = favoritesList(contactsBox.values.toList());
+                          builder:
+                              (context, Box<MyContact> contactsBox, child) {
+                            favorites =
+                                favoritesList(contactsBox.values.toList());
                             return ListView.builder(
                               itemBuilder: (context, index) {
                                 return Container(
@@ -96,8 +102,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                             );
                                     },
                                     openBuilder: (context, openContainer) {
+                                               player.stop();
                                       return DetailPage(favorites[index]);
                                     },
+                                    
                                   ),
                                 );
                               },
@@ -111,6 +119,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: TextButton(
                         style: TextButton.styleFrom(padding: EdgeInsets.zero),
                         onPressed: () {
+                           player.stop();
                           Navigator.of(context).push(MaterialPageRoute(
                               builder: (context) => ContactList()));
                         },
@@ -156,8 +165,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                         ),
                                         fit: BoxFit.cover)
                                     : DecorationImage(
-                                        image:
-                                            AssetImage("assets/img/defaultpic.png"),
+                                        image: AssetImage(
+                                            "assets/img/defaultpic.png"),
                                         fit: BoxFit.cover),
                               ),
                             ),
@@ -171,58 +180,73 @@ class _MyHomePageState extends State<MyHomePage> {
                                 Text("${fmtTime(log.timestamp)}")
                               ],
                             ),
-                            trailing: IconButton(
-                              icon: isContain(log.number!)
-                                  ? Image(
-                                      image:
-                                          AssetImage("assets/img/speaker.png"),
-                                    )
-                                  : Icon(Icons.add),
-                              onPressed: isContain(log.number!)
-                                  ? () async {
-                                      String audioPath =
-                                          getAudioNamePath(log.number!);
-                                      logger.log(audioPath);
-                                      if (audioPath != " ") {
-                                        File f = File(audioPath);
-                                        if (await f.exists()) {
-                                          logger.log("play audio");
-                                          player.play(audioPath,isLocal: true);
-                                        }
-                                      }
-                                    }
-                                  : () {
-                                      logger.log("add new ");
-                                      Navigator.of(context)
-                                          .push(MaterialPageRoute<MyContact>(
-                                              builder: (context) =>
-                                                  NewContact(log.number!)))
-                                          .then((value) {
-                                        if (value != null) {
-                                          setState(() {
-                                            contactList.add(value);
-                                            box.put(value.uuid, value);
-                                          });
-                                        }
-                                        logger.log(
-                                            box.values.toList().toString());
-                                      });
-                                    },
-                            ),
+                            trailing: matchPhoneNumber(log.number!)
+                                ? IconButton(
+                                    icon: isContain(log.number!)
+                                        ? Image(
+                                          color: Colors.teal,
+                                            image: AssetImage(
+                                                "assets/img/speaker.png"),
+                                          )
+                                        : Icon(Icons.add),
+                                    onPressed: isContain(log.number!)
+                                        ? () async {
+                                            String audioPath =
+                                                getAudioNamePath(log.number!);
+                                            logger.log(audioPath);
+                                            if (audioPath != " ") {
+                                              File f = File(audioPath);
+                                              if (await f.exists()) {
+                                                logger.log("play audio");
+                                                player.play(audioPath,
+                                                    isLocal: true);
+                                              }
+                                            }
+                                          }
+                                        : () {
+                                            logger.log("add new ");
+                                            Navigator.of(context)
+                                                .push(MaterialPageRoute<
+                                                        MyContact>(
+                                                    builder: (context) =>
+                                                        NewContact(
+                                                            log.number!)))
+                                                .then((value) {
+                                              if (value != null) {
+                                                setState(() {
+                                                  contactList.add(value);
+                                                  box.put(value.uuid, value);
+                                                });
+                                              }
+                                              logger.log(box.values
+                                                  .toList()
+                                                  .toString());
+                                            });
+                                          },
+                                  )
+                                : null,
+                                onLongPress: (){
+                                  Clipboard.setData(new ClipboardData(text: log.number!));
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Copy : ${log.number!}")));
+                                  logger.log("long press");
+                                },
                           ),
                           actionPane: SlidableDrawerActionPane(),
-                          secondaryActions: [
-                            IconButton(
-                              icon: Icon(
-                                Icons.call,
-                                size: 28,
-                                color: Colors.green,
-                              ),
-                              onPressed: () {
-                                FlutterPhoneDirectCaller.callNumber(contactList[index].numbers!.first);                                
-                              },
-                            )
-                          ],
+                          secondaryActions: matchPhoneNumber(log.number!)
+                              ? [
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.call,
+                                      size: 28,
+                                      color: Colors.green,
+                                    ),
+                                    onPressed: () {
+                                      FlutterPhoneDirectCaller.callNumber(
+                                          log.number!);
+                                    },
+                                  )
+                                ]
+                              : [],
                         );
                       },
                       itemCount: callLogs.length,
@@ -248,11 +272,6 @@ class _MyHomePageState extends State<MyHomePage> {
         dateFrom:
             DateTime.now().subtract(Duration(days: 200)).millisecondsSinceEpoch,
         dateTo: DateTime.now().millisecondsSinceEpoch);
-  }
-
-  String fmtTime(int? time) {
-    var t = DateTime.fromMillisecondsSinceEpoch(time!);
-    return "${t.day}/${t.month}/${t.year}";
   }
 
   bool isContain(String number) {

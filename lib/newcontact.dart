@@ -219,7 +219,7 @@ class _NewContactState extends State<NewContact> {
                       logger.log(" image file Name = $fileName");
                       image!.copy(dir.path + "/" + fileName);
                       newContact = MyContact(
-                          uuid:Uuid().v4().toString(),
+                          uuid:uuid,
                           picture:dir.path + "/" + fileName,
                           numbers:[phCtl.text],
                           audioName:dir.path + "/" + uuid + ".wav");
