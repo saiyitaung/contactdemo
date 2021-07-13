@@ -21,7 +21,7 @@ class _NewContactState extends State<NewContact> {
   final ImagePicker _picker = new ImagePicker();
   TextEditingController phCtl = TextEditingController();
   final String uuid = Uuid().v4().toString();
-  AudioPlayer player =AudioPlayer();
+  AudioPlayer player = AudioPlayer();
   MyLogger logger = MyLogger("NewContact", "");
 
   void initState() {
@@ -70,52 +70,61 @@ class _NewContactState extends State<NewContact> {
                   Positioned(
                     bottom: 20,
                     left: (MediaQuery.of(context).size.width / 100) * 37,
-                    child: DropdownButton<ImageSource>(
-                      items: [
-                        DropdownMenuItem<ImageSource>(
-                          child: Text("Camera"),
-                          value: ImageSource.camera,
-                        ),
-                        DropdownMenuItem<ImageSource>(
-                          child: Text("gallery"),
-                          value: ImageSource.gallery,
-                        )
-                      ],
-                      onChanged: (v) async {
-                        if (v == ImageSource.camera) {
-                          _pickedFile = await _picker.getImage(
-                              source: ImageSource.camera);
-                          if (_pickedFile != null) {
-                            logger.log("new pic was taken");
-                            image = File(_pickedFile!.path);
-                            logger.log("File path :: ${image?.path}");
-                            image!.stat().then(
-                                (value) => logger.log("size :: ${value.size}"));
-                            logger.log(
-                                "file size :: ${image!.stat().then((value) => value.size)}");
-                          } else {
-                            logger.log("Cancel taking pic");
-                          }
-                          setState(() {});
-                        } else {
-                          _pickedFile = await _picker.getImage(
-                              source: ImageSource.gallery);
-                          if (_pickedFile != null) {
-                            image = File(_pickedFile!.path);
-                          }
-                          setState(() {});
-                        }
-                      },
-                      selectedItemBuilder: (context) {
-                        return [
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 5),
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          borderRadius: BorderRadius.circular(5)),
+                      child: DropdownButton<ImageSource>(
+                        dropdownColor: Colors.blueGrey,
+                        
+                        underline: Container(),
+                        items: [
                           DropdownMenuItem<ImageSource>(
-                            child: Text("Set Picture",
-                                style: TextStyle(color: Colors.white)),
+                            child: Text("Camera",style: TextStyle(color: Colors.white),),
                             value: ImageSource.camera,
                           ),
-                        ];
-                      },
-                      value: ImageSource.camera,
+                          DropdownMenuItem<ImageSource>(
+                            child: Text("gallery",style: TextStyle(color: Colors.white),),
+                            value: ImageSource.gallery,
+                          )
+                        ],
+                        onChanged: (v) async {
+                          if (v == ImageSource.camera) {
+                            _pickedFile = await _picker.getImage(
+                                source: ImageSource.camera);
+                            if (_pickedFile != null) {
+                              logger.log("new pic was taken");
+                              image = File(_pickedFile!.path);
+                              logger.log("File path :: ${image?.path}");
+                              image!.stat().then((value) =>
+                                  logger.log("size :: ${value.size}"));
+                              logger.log(
+                                  "file size :: ${image!.stat().then((value) => value.size)}");
+                            } else {
+                              logger.log("Cancel taking pic");
+                            }
+                            setState(() {});
+                          } else {
+                            _pickedFile = await _picker.getImage(
+                                source: ImageSource.gallery);
+                            if (_pickedFile != null) {
+                              image = File(_pickedFile!.path);
+                            }
+                            setState(() {});
+                          }
+                        },
+                        selectedItemBuilder: (context) {
+                          return [
+                            DropdownMenuItem<ImageSource>(
+                              child: Text("Set Picture",
+                                  style: TextStyle(color: Colors.white)),
+                              value: ImageSource.camera,
+                            ),
+                          ];
+                        },
+                        value: ImageSource.camera,
+                      ),
                     ),
                   ),
                 ],
@@ -184,7 +193,7 @@ class _NewContactState extends State<NewContact> {
                             .exists()) {
                           // await AudioPlayer()
                           //     .play(dir.path + "/" + uuid + ".wav");
-                          player.play(dir.path+"/"+uuid+".wav");
+                          player.play(dir.path + "/" + uuid + ".wav");
                         }
                       },
                       icon: Image(
@@ -210,8 +219,11 @@ class _NewContactState extends State<NewContact> {
                       await File(dir!.path + "/" + uuid + ".wav").exists()) {
                     MyContact newContact;
                     if (image?.path == null) {
-                      newContact = MyContact(uuid:uuid, picture:"", numbers:[phCtl.text],
-                          audioName:dir.path + "/" + uuid + ".wav");
+                      newContact = MyContact(
+                          uuid: uuid,
+                          picture: "",
+                          numbers: [phCtl.text],
+                          audioName: dir.path + "/" + uuid + ".wav");
                     } else {
                       List<String> splits = image!.path.split("/");
                       final fileExt = splits.last.split(".")[1];
@@ -219,16 +231,16 @@ class _NewContactState extends State<NewContact> {
                       logger.log(" image file Name = $fileName");
                       image!.copy(dir.path + "/" + fileName);
                       newContact = MyContact(
-                          uuid:uuid,
-                          picture:dir.path + "/" + fileName,
-                          numbers:[phCtl.text],
-                          audioName:dir.path + "/" + uuid + ".wav");
+                          uuid: uuid,
+                          picture: dir.path + "/" + fileName,
+                          numbers: [phCtl.text],
+                          audioName: dir.path + "/" + uuid + ".wav");
                     }
                     logger.log("new Contact ${newContact.picture}");
                     Navigator.of(context).pop(newContact);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text("Audio Name and Phone Number Required"),
+                      content: Text("Audio Name and Phone Number are required"),
                       duration: Duration(milliseconds: 700),
                     ));
                   }

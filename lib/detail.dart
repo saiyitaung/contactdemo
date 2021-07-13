@@ -30,8 +30,9 @@ class _DetailPageState extends State<DetailPage> {
   Widget build(BuildContext context) {
     logger.log(contact.picture!);
     return Scaffold(
+     
       appBar: AppBar(
-        title: Text("Detail page"),
+        title: Text("Detail"),
         actions: [
           IconButton(
             onPressed: () {
@@ -101,10 +102,11 @@ class _DetailPageState extends State<DetailPage> {
           Container(
             height: 60,
             width: MediaQuery.of(context).size.width,
+           
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Container(
+                Container(                  
                   child: IconButton(
                     onPressed: () async {
                       File f = File(contact.audioName!);
@@ -135,28 +137,61 @@ class _DetailPageState extends State<DetailPage> {
               ],
             ),
           ),
-          Expanded(
-              child: ListView.builder(
-            itemBuilder: (context, index) {
-              return Padding(
+           Padding(
                 child: ListTile(
                   leading: IconButton(
                     icon: Icon(Icons.phone, color: Colors.green),
                     onPressed: () {
                       FlutterPhoneDirectCaller.callNumber(
-                          contact.numbers![index]);
+                          contact.numbers!.first);
                     },
                   ),
                   title: Text(
-                    contact.numbers![index],
-                    style: TextStyle(fontSize: 22),
+                    contact.numbers!.first,
+                    style: TextStyle(fontSize: 26),
                   ),
                 ),
                 padding: EdgeInsets.symmetric(horizontal: 20),
-              );
-            },
-            itemCount: contact.numbers!.length,
-          )),
+              ),
+              contact.numbers!.length == 2 ? Padding(
+                child: ListTile(
+                  leading: IconButton(
+                    icon: Icon(Icons.phone, color: Colors.green),
+                    onPressed: () {
+                      FlutterPhoneDirectCaller.callNumber(
+                          contact.numbers!.last);
+                    },
+                  ),
+                  title: Text(
+                    contact.numbers!.last,
+                    style: TextStyle(fontSize: 26),
+                  ),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 20),
+              ):SizedBox(),
+            // },
+          // Expanded(
+          //     child: ListView.builder(
+          //   itemBuilder: (context, index) {
+          //     return Padding(
+          //       child: ListTile(
+          //         leading: IconButton(
+          //           icon: Icon(Icons.phone, color: Colors.green),
+          //           onPressed: () {
+          //             FlutterPhoneDirectCaller.callNumber(
+          //                 contact.numbers![index]);
+          //           },
+          //         ),
+          //         title: Text(
+          //           contact.numbers![index],
+          //           style: TextStyle(fontSize: 26),
+          //         ),
+          //       ),
+          //       padding: EdgeInsets.symmetric(horizontal: 20),
+          //     );
+          //   },
+          //   itemCount: contact.numbers!.length,
+          // )),
         ],
       ),
       // floatingActionButton: FloatingActionButton(

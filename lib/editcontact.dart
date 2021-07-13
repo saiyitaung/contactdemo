@@ -74,11 +74,11 @@ class _EditContactState extends State<EditContact> {
                         underline: Container(),
                         items: [
                           DropdownMenuItem<ImageSource>(
-                            child: Text("Camera"),
+                            child: Text("Camera",style: TextStyle(color: Colors.white),),
                             value: ImageSource.camera,
                           ),
                           DropdownMenuItem<ImageSource>(
-                            child: Text("gallery"),
+                            child: Text("gallery",style: TextStyle(color: Colors.white),),
                             value: ImageSource.gallery,
                           )
                         ],
@@ -150,23 +150,26 @@ class _EditContactState extends State<EditContact> {
                 ],
               ),
             ),
+            SizedBox(height: 5,),
             Container(
               height: 60,
               width: MediaQuery.of(context).size.width,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Container(
-                    child: Text(
-                      "Phone Number",
-                      textAlign: TextAlign.center,
-                    ),
-                    width: (MediaQuery.of(context).size.width / 100) * 40,
-                  ),
+                  // Container(
+                  //   child: Text(
+                  //     "Phone Number",
+                  //     textAlign: TextAlign.center,
+                  //   ),
+                  //   width: (MediaQuery.of(context).size.width / 100) * 40,
+                  // ),
                   Container(
                     child: TextField(
+                      style: TextStyle(fontSize: 20),
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                           hintText: "Phone Number", labelText: "Phone Number"),
                       controller: phCtl,
                       onChanged: (v) {
@@ -176,29 +179,31 @@ class _EditContactState extends State<EditContact> {
                          }
                       },
                     ),
-                    width: (MediaQuery.of(context).size.width / 100) * 55,
+                    width: (MediaQuery.of(context).size.width / 100) * 70,
                   ),
                 ],
               ),
             ),
+            SizedBox(height:5),
             Container(
               height: 60,
               width: MediaQuery.of(context).size.width,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Container(
-                    child: Text(
-                      "Phone Number 2",
-                      textAlign: TextAlign.center,
-                    ),
-                    width: (MediaQuery.of(context).size.width / 100) * 40,
-                  ),
+                  // Container(
+                  //   child: Text(
+                  //     "Phone Number 2",
+                  //     textAlign: TextAlign.center,
+                  //   ),
+                  //   width: (MediaQuery.of(context).size.width / 100) * 40,
+                  // ),
                   Container(
                     child: TextField(
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                          hintText: "Phone Number", labelText: "Phone Number"),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10),),
+                          hintText: "Phone Number 2 ", labelText: "Phone Number 2"),
                       controller: phCtl2,
                       onChanged: (v) {
                         if (v.length > 8 && v.length < 12) {
@@ -212,7 +217,7 @@ class _EditContactState extends State<EditContact> {
                         }
                       },
                     ),
-                    width: (MediaQuery.of(context).size.width / 100) * 55,
+                    width: (MediaQuery.of(context).size.width / 100) * 70,
                   ),
                 ],
               ),
@@ -221,15 +226,15 @@ class _EditContactState extends State<EditContact> {
               height: 60,
               width: MediaQuery.of(context).size.width,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    child: Text(
-                      "Name",
-                      textAlign: TextAlign.center,
-                    ),
-                    width: (MediaQuery.of(context).size.width / 100) * 30,
-                  ),
+                  // Container(
+                  //   child: Text(
+                  //     "Name",
+                  //     textAlign: TextAlign.center,
+                  //   ),
+                  //   width: (MediaQuery.of(context).size.width / 100) * 30,
+                  // ),
                   Container(
                     child: IconButton(
                       icon: Icon(Icons.mic),
@@ -279,7 +284,8 @@ class _EditContactState extends State<EditContact> {
                         await player.play(contact.audioName!);
                       },
                       icon: Image(
-                        image: AssetImage("assets/img/speaker.png"),
+                        
+                        image: AssetImage("assets/img/speaker.png",),
                       ),
                     ),
                     width: (MediaQuery.of(context).size.width / 100) * 30,

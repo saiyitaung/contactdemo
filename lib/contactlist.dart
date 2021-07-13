@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:mycontactapp/detail.dart';
 import 'package:mycontactapp/entity/mycontact.dart';
@@ -8,8 +9,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:mycontactapp/utils/util.dart';
 
 class ContactList extends StatefulWidget {
-  //final List<MyContact> contactList;
-  //ContactList(this.imgNames);
   _ContactListState createState() => _ContactListState();
 }
 
@@ -26,17 +25,23 @@ class _ContactListState extends State<ContactList> {
           builder: (context, Box<MyContact> contacts, child) {
             contactList = contacts.values.toList();
             return GridView.builder(
+              padding: EdgeInsets.all(5),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
                   crossAxisSpacing: 5,
                   mainAxisSpacing: 5,
                   childAspectRatio: 1.1),
               itemBuilder: (context, index) {
-                return InkWell(
-                  child: Card(
+                return OpenContainer(
+                  transitionDuration: Duration(milliseconds: 350),
+                  transitionType: ContainerTransitionType.fade,
+
+                  closedBuilder: (context, closeContainer) {
+                  return Card(
+                     margin: EdgeInsets.zero,
                     child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
+                        // borderRadius: BorderRadius.circular(5),
 
                         image: contactList[index].picture != ""
                             ? DecorationImage(
@@ -48,16 +53,12 @@ class _ContactListState extends State<ContactList> {
                                 image: AssetImage("assets/img/defaultpic.png"),
                                 fit: BoxFit.cover,
                               ),
-                        // image: DecorationImage(
-                        //     image: AssetImage(imgNames[index].picture), fit: BoxFit.cover)),
                       ),
                     ),
-                  ),
-                  onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => DetailPage(contactList[index])));
-                  },
-                );
+                  );
+                }, openBuilder: (context, openContainer) {
+                  return DetailPage(contactList[index]);
+                });
               },
               itemCount: contactList.length,
             );

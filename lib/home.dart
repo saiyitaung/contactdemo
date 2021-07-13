@@ -74,6 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             favorites =
                                 favoritesList(contactsBox.values.toList());
                             return ListView.builder(
+                              padding: EdgeInsets.only(right:80),
                               itemBuilder: (context, index) {
                                 return Container(
                                   height: 80,
@@ -170,9 +171,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                         fit: BoxFit.cover),
                               ),
                             ),
-                            title: Text(
+                            title: Text( 
                               "${log.number}",
-                              style: TextStyle(fontSize: 22),
+                              style: TextStyle(fontSize: 22,color: index == 0 && log.callType == CallType.missed ? Colors.red:null),
                             ),
                             subtitle: Row(
                               children: [
@@ -238,7 +239,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     icon: Icon(
                                       Icons.call,
                                       size: 28,
-                                      color: Colors.green,
+                                      color: Colors.teal,
                                     ),
                                     onPressed: () {
                                       FlutterPhoneDirectCaller.callNumber(
